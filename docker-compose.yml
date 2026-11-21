@@ -1,0 +1,14 @@
+services:
+  backend:
+    build: ./spring-boot-server
+    container_name: tutorials-backend
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build: ./angular-17-client
+    container_name: tutorials-frontend
+    ports:
+      - "8081:80"
+    depends_on:
+      - backend

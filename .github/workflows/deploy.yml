@@ -1,0 +1,33 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build y levantar contenedores
+        run: docker compose up -d --build
+
+      - name: Esperar a que el backend responda
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8080/api/tutorials > /dev/null; then
+              echo "Backend OK"; exit 0
+            fi
+            echo "Esperando backend ($i/30)..."; sleep 5
+          done
+          docker compose logs
+          exit 1
+
+      - name: Verificar frontend
+        run: curl -sf http://localhost:8081 > /dev/null && echo "Frontend OK"
+
+      - name: Estado final
+        run: docker compose ps
